@@ -4,151 +4,263 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#173b32">
-<meta name="description" content="NADIX Manager - إدارة مشروعك بسهولة">
+<meta name="description" content="NADIX Manager V2 - إدارة ومحاسبة مشروع NADIX">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<title>NADIX Manager</title>
+<title>NADIX Manager V2</title>
 <style>
-:root{--green:#173b32;--mint:#e8f1ec;--gold:#e8bd69;--ink:#1d2925;--muted:#718078;--bg:#f5f7f5;--white:#fff;--red:#b33b3b}
+:root{--green:#173b32;--green2:#245747;--mint:#e8f1ec;--gold:#e8bd69;--ink:#1d2925;--muted:#718078;--bg:#f4f7f4;--white:#fff;--red:#b33b3b;--line:#e5ece7;--blue:#eaf2fb}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif}
-header{background:var(--green);color:white;padding:22px 18px 18px;border-radius:0 0 22px 22px}
-.brand{display:flex;align-items:center;gap:12px}.logo{width:46px;height:46px;border-radius:14px;background:var(--gold);color:var(--green);display:grid;place-items:center;font-weight:900;font-size:22px}
+header{background:linear-gradient(135deg,var(--green),#204b3d);color:white;padding:22px 18px 18px;border-radius:0 0 24px 24px}
+.brand{display:flex;align-items:center;gap:12px}.logo{width:50px;height:50px;border-radius:16px;background:var(--gold);color:var(--green);display:grid;place-items:center;font-weight:900;font-size:25px}
 h1{font-size:21px;margin:0}header p{margin:5px 0 0;color:#d7e5df;font-size:12px}
-main{max-width:760px;margin:auto;padding:14px 14px 90px}.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
-.stat,.panel{background:var(--white);border:1px solid #e6ece8;border-radius:16px;padding:14px;box-shadow:0 3px 12px #173b3208}
+main{max-width:850px;margin:auto;padding:14px 13px 105px}.section{display:none}.section.active{display:block}
+h2{font-size:17px;margin:4px 0 13px}.sub{font-size:12px;color:var(--muted);line-height:1.7;margin:-5px 0 10px}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
+.stat,.panel{background:var(--white);border:1px solid var(--line);border-radius:17px;padding:14px;box-shadow:0 3px 12px #173b3208}
 .stat small{color:var(--muted)}.stat strong{display:block;font-size:21px;margin-top:5px}
-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e4eae6;display:flex;overflow:auto;z-index:5;padding-bottom:env(safe-area-inset-bottom)}
-nav button{flex:1;min-width:66px;border:0;background:none;padding:10px 3px;color:#617069;font-size:11px}
-nav button.active{color:var(--green);font-weight:800}nav span{display:block;font-size:19px;margin-bottom:3px}
-h2{font-size:17px;margin:4px 0 13px}.section{display:none}.section.active{display:block}
 .panel{margin-top:12px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 label{display:block;font-size:12px;color:#59675f;margin:10px 0 5px}
-input,select{width:100%;border:1px solid #dce5df;border-radius:11px;padding:12px;font:inherit;font-size:14px;background:#fff;color:var(--ink)}
-button.primary{background:var(--green);color:#fff;border:0;border-radius:11px;padding:12px 16px;font:inherit;font-weight:700;width:100%;margin-top:12px}
+input,select{width:100%;border:1px solid #dce5df;border-radius:11px;padding:12px;font:inherit;font-size:14px;background:#fff;color:var(--ink);min-width:0}
+button{cursor:pointer}button.primary{background:var(--green);color:#fff;border:0;border-radius:11px;padding:12px 16px;font:inherit;font-weight:700;width:100%;margin-top:12px}
 button.secondary{background:var(--mint);color:var(--green);border:0;border-radius:10px;padding:10px;font:inherit}
-.item{padding:11px 0;border-bottom:1px solid #edf1ee;display:flex;justify-content:space-between;gap:8px;font-size:13px}.item:last-child{border:0}
-.muted{color:var(--muted);font-size:12px}.danger{color:var(--red)}.actions{display:flex;gap:8px;flex-wrap:wrap}.actions button{flex:1}
+button.warn{background:#fff1ed;color:#9b352c;border:0;border-radius:10px;padding:10px;font:inherit}
+.item{padding:11px 0;border-bottom:1px solid #edf1ee;display:flex;justify-content:space-between;align-items:center;gap:9px;font-size:13px}.item:last-child{border:0}
+.item small{display:block;color:var(--muted);font-size:11px;margin-top:3px;line-height:1.6}
+.muted{color:var(--muted);font-size:12px}.danger{color:var(--red)}.good{color:#26734f}
+.actions{display:flex;gap:8px;flex-wrap:wrap}.actions button{flex:1}
 .empty{color:var(--muted);text-align:center;padding:18px;font-size:13px}
-.notice{background:#fff7e6;border:1px solid #f1dfb7;padding:11px;border-radius:12px;font-size:12px;color:#6e5523;margin-top:12px}
-.hidden{display:none!important}
-@media(min-width:600px){.stats{grid-template-columns:repeat(4,1fr)}}
+.notice{background:#fff7e6;border:1px solid #f1dfb7;padding:11px;border-radius:12px;font-size:12px;color:#6e5523;margin-top:12px;line-height:1.7}
+.hidden{display:none!important}.pill{font-size:10px;padding:4px 8px;border-radius:20px;background:var(--mint);color:var(--green);white-space:nowrap}
+.pill.red{background:#fff0ee;color:#a33830}.pill.gold{background:#fff6df;color:#775719}
+nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e4eae6;display:flex;overflow-x:auto;z-index:5;padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;min-width:66px;border:0;background:none;padding:9px 3px;color:#617069;font-size:10px;white-space:nowrap}
+nav button.active{color:var(--green);font-weight:800}nav span{display:block;font-size:18px;margin-bottom:3px}
+.kpi{display:flex;justify-content:space-between;gap:8px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px}.kpi:last-child{border:0}
+.monthhead{display:flex;justify-content:space-between;align-items:center;gap:8px}
+@media(min-width:650px){.stats{grid-template-columns:repeat(4,1fr)}main{padding-left:20px;padding-right:20px}}
 </style>
 </head>
 <body>
-<header><div class="brand"><div class="logo">N</div><div><h1>NADIX Manager</h1><p>إدارة مشروعك ببساطة · الدينار الجزائري</p></div></div></header>
+<header><div class="brand"><div class="logo">N</div><div><h1>NADIX Manager <small style="font-size:11px;color:#e8bd69">V2</small></h1><p>إدارة ومحاسبة مشروعك · الدينار الجزائري</p></div></div></header>
 <main>
 <section id="home" class="section active">
 <h2>لوحة التحكم</h2>
 <div class="stats">
 <div class="stat"><small>الرصيد النقدي</small><strong id="cash">0 دج</strong></div>
+<div class="stat"><small>صافي الربح</small><strong id="profit">0 دج</strong></div>
 <div class="stat"><small>إجمالي المبيعات</small><strong id="sales">0 دج</strong></div>
-<div class="stat"><small>الربح التقديري</small><strong id="profit">0 دج</strong></div>
-<div class="stat"><small>مخزون Kits</small><strong id="stock">0</strong></div>
+<div class="stat"><small>مخزون Kits الجاهزة</small><strong id="stock">0</strong></div>
 </div>
-<div class="panel"><h2>ملخص المشروع</h2><div id="summary"></div></div>
-<div class="notice">بياناتك محفوظة على هذا الجهاز. استعمل النسخ الاحتياطي بانتظام حتى لا تفقدها عند تغيير المتصفح أو الهاتف.</div>
+<div class="panel"><h2>الوضعية المالية</h2><div id="financialSummary"></div></div>
+<div class="panel"><h2>آخر العمليات</h2><div id="recentList"></div></div>
+<div class="notice">بياناتك محفوظة محلياً على هذا الهاتف والمتصفح. صدّر نسخة احتياطية بانتظام، خصوصاً قبل تغيير الهاتف أو المتصفح.</div>
 </section>
 
 <section id="materials" class="section">
-<div class="panel"><h2>المواد والمخزون</h2>
+<div class="panel"><h2>المواد والمخزون الأولي</h2><p class="sub">استعمل هذه الصفحة لإدخال الكمية الموجودة عند بداية استعمال النظام فقط. المشتريات الجديدة سجّلها من صفحة المشتريات.</p>
 <label>اسم المادة</label><input id="matName" placeholder="مثال: الجبس">
-<div class="grid"><div><label>الكمية الحالية</label><input id="matQty" type="number" min="0" step="0.01" placeholder="مثال: 5000"></div><div><label>الوحدة</label><input id="matUnit" placeholder="غرام / قطعة"></div></div>
-<label>تكلفة الكمية الإجمالية (دج)</label><input id="matCost" type="number" min="0" placeholder="مثال: 600">
-<button class="primary" onclick="addMaterial()">إضافة / تحديث المادة</button><div id="materialsList"></div>
-</div>
-</section>
+<div class="grid"><div><label>الكمية الموجودة</label><input id="matQty" type="number" min="0.01" step="0.01" placeholder="مثال: 5000"></div><div><label>الوحدة</label><input id="matUnit" placeholder="غرام / قطعة"></div></div>
+<label>القيمة الإجمالية للمخزون الأولي (دج)</label><input id="matCost" type="number" min="0" step="1" placeholder="مثال: 600">
+<button class="primary" onclick="addOpeningMaterial()">إضافة مخزون أولي</button><div id="materialsList"></div>
+</div></section>
+
+<section id="purchases" class="section">
+<div class="panel"><h2>شراء المواد</h2><p class="sub">كل عملية شراء تزيد كمية المادة وتحدّث متوسط تكلفة الوحدة، وتُخصم من النقدية فقط قيمة المبلغ المدفوع فعلاً.</p>
+<label>المادة</label><select id="purchaseMat"></select>
+<div class="grid"><div><label>الكمية المشتراة</label><input id="purchaseQty" type="number" min="0.01" step="0.01" placeholder="مثال: 2000"></div><div><label>التكلفة الإجمالية (دج)</label><input id="purchaseCost" type="number" min="0" step="1" placeholder="مثال: 500"></div></div>
+<label>المورد (اختياري)</label><input id="supplier" placeholder="اسم المحل أو المورد">
+<div class="grid"><div><label>المبلغ المدفوع الآن</label><input id="purchasePaid" type="number" min="0" step="1" placeholder="اتركه فارغاً للدفع الكامل"></div><div><label>ملاحظة (اختياري)</label><input id="purchaseNote" placeholder="مثال: شراء جبس"></div></div>
+<button class="primary" onclick="addPurchase()">تسجيل المشتريات</button><div id="purchasesList"></div>
+</div></section>
 
 <section id="recipe" class="section">
-<div class="panel"><h2>وصفة Mini Kit</h2><p class="muted">أدخل استهلاك كل مادة في Kit واحد. الكمية تبقى قابلة للتعديل.</p>
+<div class="panel"><h2>وصفة Mini Kit</h2><p class="sub">حدد استهلاك كل مادة في Kit واحد. المقادير والأسعار قابلة للتعديل.</p>
 <label>المادة</label><select id="recipeMat"></select>
-<div class="grid"><div><label>الكمية لكل Kit</label><input id="recipeQty" type="number" min="0" step="0.01" placeholder="مثال: 250"></div><div><label>الوحدة</label><input id="recipeUnit" disabled placeholder="تُحدد من المادة"></div></div>
+<div class="grid"><div><label>الكمية لكل Kit</label><input id="recipeQty" type="number" min="0.001" step="0.01" placeholder="مثال: 250"></div><div><label>الوحدة</label><input id="recipeUnit" disabled placeholder="تُحدد من المادة"></div></div>
 <button class="primary" onclick="saveRecipe()">حفظ الوصفة</button><div id="recipeList"></div>
-</div>
-</section>
+<div class="kpi"><span>تكلفة المواد في Kit واحد</span><b id="recipeCost">0 دج</b></div>
+</div></section>
 
 <section id="production" class="section">
-<div class="panel"><h2>تسجيل الإنتاج</h2>
-<label>عدد Kits المنتجة</label><input id="prodQty" type="number" min="1" step="1" placeholder="مثال: 5">
-<button class="primary" onclick="produce()">تأكيد الإنتاج وخصم المواد</button>
-<div id="productionHint" class="muted"></div>
-</div>
-</section>
+<div class="panel"><h2>تسجيل الإنتاج</h2><label>عدد Kits المنتجة</label><input id="prodQty" type="number" min="1" step="1" placeholder="مثال: 5">
+<button class="primary" onclick="produce()">تأكيد الإنتاج وخصم المواد</button><div id="productionHint" class="muted" style="margin-top:10px"></div><div id="productionList"></div>
+</div></section>
 
 <section id="salesTab" class="section">
 <div class="panel"><h2>تسجيل المبيعات</h2>
-<div class="grid"><div><label>عدد Kits</label><input id="saleQty" type="number" min="1" step="1" placeholder="1"></div><div><label>سعر البيع للوحدة (دج)</label><input id="salePrice" type="number" min="0" placeholder="مثال: 700"></div></div>
+<div class="grid"><div><label>عدد Kits</label><input id="saleQty" type="number" min="1" step="1" placeholder="1"></div><div><label>سعر البيع للوحدة (دج)</label><input id="salePrice" type="number" min="0" step="1" placeholder="مثال: 700"></div></div>
 <label>اسم الزبون (اختياري)</label><input id="customer" placeholder="اسم الزبون">
-<label>حالة الدفع</label><select id="paid"><option value="yes">مدفوع</option><option value="no">لم يُدفع بعد</option></select>
+<label>المبلغ المقبوض الآن</label><input id="salePaid" type="number" min="0" step="1" placeholder="اتركه فارغاً لقبض المبلغ كاملاً">
 <button class="primary" onclick="addSale()">تسجيل البيع</button><div id="salesList"></div>
 </div></section>
 
 <section id="expenses" class="section">
-<div class="panel"><h2>المصاريف التشغيلية</h2>
-<label>وصف المصروف</label><input id="expenseName" placeholder="مثال: نقل أو طباعة">
-<label>المبلغ (دج)</label><input id="expenseAmount" type="number" min="0" placeholder="0">
+<div class="panel"><h2>المصاريف التشغيلية</h2><label>وصف المصروف</label><input id="expenseName" placeholder="مثال: نقل أو طباعة أو توصيل">
+<div class="grid"><div><label>المبلغ (دج)</label><input id="expenseAmount" type="number" min="1" step="1" placeholder="0"></div><div><label>التصنيف</label><select id="expenseCategory"><option>نقل وتوصيل</option><option>طباعة وتغليف</option><option>تسويق</option><option>أدوات ومعدات</option><option>أخرى</option></select></div></div>
 <button class="primary" onclick="addExpense()">إضافة المصروف</button><div id="expensesList"></div>
 </div></section>
 
+<section id="reports" class="section">
+<div class="panel"><div class="monthhead"><h2>التقرير الشهري</h2><input id="reportMonth" type="month" style="max-width:165px" onchange="renderReports()"></div>
+<div id="reportSummary"></div></div>
+<div class="panel"><h2>سجل العمليات</h2><div id="ledger"></div></div>
+</section>
+
 <section id="settings" class="section">
 <div class="panel"><h2>الإعدادات والنسخ الاحتياطي</h2>
-<label>رأس المال الأولي (دج)</label><input id="capital" type="number" min="0">
+<label>رأس المال الأولي (دج)</label><input id="capital" type="number" min="0" step="1">
 <button class="primary" onclick="saveCapital()">حفظ رأس المال</button>
 <div class="actions"><button class="secondary" onclick="exportBackup()">تصدير نسخة احتياطية</button><button class="secondary" onclick="document.getElementById('restoreFile').click()">استرجاع نسخة</button></div>
 <input id="restoreFile" class="hidden" type="file" accept="application/json" onchange="restoreBackup(event)">
-<p class="muted">النسخة الاحتياطية تحفظ المواد والوصفة والإنتاج والمبيعات والمصاريف.</p>
-<button class="secondary" onclick="installApp()" id="installBtn" style="width:100%;margin-top:10px">تثبيت التطبيق</button>
-</div>
-</section>
+<p class="muted">النسخة تشمل المواد والوصفة والإنتاج والمشتريات والمبيعات والدفعات والمصاريف.</p>
+<button class="warn" onclick="clearData()" style="width:100%;margin-top:12px">مسح كل البيانات</button>
+<div class="notice">لا تضغط مسح كل البيانات إلا إذا كنت متأكداً. استعمل النسخ الاحتياطي قبل أي تحديث أو تغيير جهاز.</div>
+</div></section>
 </main>
 <nav>
 <button class="active" onclick="show('home',this)"><span>⌂</span>الرئيسية</button>
 <button onclick="show('materials',this)"><span>▤</span>المواد</button>
+<button onclick="show('purchases',this)"><span>🛒</span>المشتريات</button>
 <button onclick="show('recipe',this)"><span>⚙</span>الوصفة</button>
 <button onclick="show('production',this)"><span>＋</span>الإنتاج</button>
 <button onclick="show('salesTab',this)"><span>▣</span>المبيعات</button>
 <button onclick="show('expenses',this)"><span>−</span>المصاريف</button>
+<button onclick="show('reports',this)"><span>▥</span>التقارير</button>
 <button onclick="show('settings',this)"><span>☰</span>الإعدادات</button>
 </nav>
 <script>
 const KEY='nadix_pwa_v1';
-let data=load();
 function blank(){return {capital:5000,materials:[],purchases:[],recipe:[],finished:0,unitCost:0,sales:[],expenses:[],production:[]}}
-function load(){try{return {...blank(),...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch(e){return blank()}}
+function load(){
+ try{
+  const old=JSON.parse(localStorage.getItem(KEY)||'{}');
+  const d={...blank(),...old};
+  ['materials','purchases','recipe','sales','expenses','production'].forEach(k=>{if(!Array.isArray(d[k]))d[k]=[]});
+  d.sales=d.sales.map(s=>({...s,paidAmount:s.paidAmount==null?(s.paid?Number(s.qty)*Number(s.price):0):Number(s.paidAmount),payments:Array.isArray(s.payments)?s.payments:[]}));
+  d.purchases=d.purchases.map(p=>({...p,paidAmount:p.paidAmount==null?(p.paid?Number(p.cost):0):Number(p.paidAmount),payments:Array.isArray(p.payments)?p.payments:[]}));
+  return d;
+ }catch(e){return blank()}
+}
+let data=load();
 function save(){localStorage.setItem(KEY,JSON.stringify(data));render()}
-function money(n){return (Number(n)||0).toLocaleString('ar-DZ')+' دج'}
+function money(n){return (Number(n)||0).toLocaleString('ar-DZ',{maximumFractionDigits:2})+' دج'}
+function dateText(d){return new Date(d).toLocaleDateString('ar-DZ')}
 function show(id,btn){document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));btn.classList.add('active');render()}
-function addMaterial(){
- let name=matName.value.trim(),qty=+matQty.value,cost=+matCost.value,unit=matUnit.value.trim();
- if(!name||qty<0||!unit||cost<0)return alert('أكمل معلومات المادة بشكل صحيح');
- let m=data.materials.find(x=>x.name.toLowerCase()===name.toLowerCase()&&x.unit===unit);
- if(m){let total=m.qty+m.cost/Math.max(m.qty,0.0001)*0;let oldValue=m.qty*m.rate;m.qty+=qty;m.rate=(oldValue+cost)/Math.max(m.qty,0.0001)}
- else data.materials.push({id:Date.now(),name,qty,unit,rate:qty?cost/qty:0});
- matName.value=matQty.value=matUnit.value=matCost.value='';save()
+function val(id){return document.getElementById(id).value}
+function clear(ids){ids.forEach(id=>document.getElementById(id).value='')}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function sum(a,fn){return a.reduce((t,x)=>t+(Number(fn(x))||0),0)}
+function totals(){
+ const sales=sum(data.sales,s=>s.qty*s.price),received=sum(data.sales,s=>s.paidAmount||0);
+ const receivables=Math.max(0,sales-received),cogs=sum(data.sales,s=>s.cost||0);
+ const expenses=sum(data.expenses,e=>e.amount),purchaseTotal=sum(data.purchases,p=>p.cost||0),purchasePaid=sum(data.purchases,p=>p.paidAmount||0);
+ const payables=Math.max(0,purchaseTotal-purchasePaid),rawValue=sum(data.materials,m=>m.qty*m.rate);
+ const finishedValue=(Number(data.finished)||0)*(Number(data.unitCost)||0);
+ const cash=(Number(data.capital)||0)+received-purchasePaid-expenses;
+ const grossProfit=sales-cogs,netProfit=grossProfit-expenses;
+ return {sales,received,receivables,cogs,expenses,purchaseTotal,purchasePaid,payables,rawValue,finishedValue,cash,grossProfit,netProfit};
 }
-function saveRecipe(){let id=+recipeMat.value,q=+recipeQty.value;if(!id||q<=0)return alert('اختر المادة وأدخل كمية صحيحة');let m=data.materials.find(x=>x.id===id);let r=data.recipe.find(x=>x.materialId===id);if(r)r.qty=q;else data.recipe.push({materialId:id,qty:q});save()}
-function recipeCost(){return data.recipe.reduce((s,r)=>{let m=data.materials.find(x=>x.id===r.materialId);return s+(m?m.rate*r.qty:0)},0)}
-function produce(){let n=Math.floor(+prodQty.value);if(n<1)return alert('أدخل عدد Kits صحيح');if(!data.recipe.length)return alert('أضف وصفة الإنتاج أولاً');for(let r of data.recipe){let m=data.materials.find(x=>x.id===r.materialId);if(!m||m.qty<r.qty*n)return alert('الكمية غير كافية من: '+(m?m.name:'مادة محذوفة'))}
-let cost=recipeCost();data.recipe.forEach(r=>{let m=data.materials.find(x=>x.id===r.materialId);m.qty-=r.qty*n});
-data.unitCost=data.finished+n?((data.unitCost*data.finished+cost*n)/(data.finished+n)):cost;data.finished+=n;data.production.push({date:new Date().toISOString(),qty:n,cost:cost*n});prodQty.value='';save()}
-function addSale(){let q=Math.floor(+saleQty.value),p=+salePrice.value;if(q<1||p<0||q>data.finished)return alert('تحقق من الكمية والسعر والمخزون');let paidNow=paid.value==='yes';data.finished-=q;data.sales.push({date:new Date().toISOString(),qty:q,price:p,customer:customer.value,paid:paidNow,cost:data.unitCost*q});saleQty.value=salePrice.value=customer.value='';save()}
-function addExpense(){let name=expenseName.value.trim(),amount=+expenseAmount.value;if(!name||amount<=0)return alert('أدخل وصفاً ومبلغاً صحيحاً');data.expenses.push({name,amount,date:new Date().toISOString()});expenseName.value=expenseAmount.value='';save()}
-function saveCapital(){data.capital=Math.max(0,+capital.value||0);save();alert('تم حفظ رأس المال')}
-function totals(){let sales=data.sales.reduce((s,x)=>s+x.qty*x.price,0),received=data.sales.filter(x=>x.paid).reduce((s,x)=>s+x.qty*x.price,0),cogs=data.sales.reduce((s,x)=>s+x.cost,0),expenses=data.expenses.reduce((s,x)=>s+x.amount,0),purchases=data.materials.reduce((s,m)=>s+m.qty*m.rate,0);let productionValue=data.finished*data.unitCost;let cash=data.capital+received-expenses;return {sales,received,cogs,expenses,purchases,productionValue,cash,profit:data.sales.reduce((s,x)=>s+x.qty*x.price-x.cost,0)-expenses}}
-function addItem(el,html){el.insertAdjacentHTML('beforeend',html)}
+function addOpeningMaterial(){
+ const name=val('matName').trim(),qty=Number(val('matQty')),unit=val('matUnit').trim(),cost=Number(val('matCost'));
+ if(!name||!unit||qty<=0||cost<0)return alert('أكمل اسم المادة والكمية والوحدة والقيمة بشكل صحيح');
+ const found=data.materials.find(m=>m.name.toLowerCase()===name.toLowerCase()&&m.unit===unit);
+ if(found){const old=found.qty*found.rate;found.qty+=qty;found.rate=(old+cost)/found.qty}
+ else data.materials.push({id:Date.now(),name,qty,unit,rate:cost/qty});
+ clear(['matName','matQty','matUnit','matCost']);save();
+}
+function addPurchase(){
+ const id=Number(val('purchaseMat')),qty=Number(val('purchaseQty')),cost=Number(val('purchaseCost'));
+ const m=data.materials.find(x=>x.id===id);
+ if(!m||qty<=0||cost<0)return alert('اختر المادة وأدخل كمية وتكلفة صحيحتين');
+ let paid=val('purchasePaid')===''?cost:Number(val('purchasePaid'));
+ if(paid<0||paid>cost)return alert('المبلغ المدفوع يجب أن يكون بين صفر وتكلفة الشراء');
+ const oldValue=m.qty*m.rate;m.qty+=qty;m.rate=(oldValue+cost)/m.qty;
+ data.purchases.push({id:Date.now(),date:new Date().toISOString(),materialId:id,materialName:m.name,qty,cost,supplier:val('supplier').trim(),note:val('purchaseNote').trim(),paidAmount:paid,payments:paid?[{amount:paid,date:new Date().toISOString(),note:'دفعة أولى'}]:[]});
+ clear(['purchaseQty','purchaseCost','supplier','purchasePaid','purchaseNote']);save();
+}
+function saveRecipe(){
+ const id=Number(val('recipeMat')),q=Number(val('recipeQty'));if(!id||q<=0)return alert('اختر المادة وأدخل كمية صحيحة');
+ const r=data.recipe.find(x=>x.materialId===id);if(r)r.qty=q;else data.recipe.push({materialId:id,qty:q});clear(['recipeQty']);save();
+}
+function recipeCost(){return sum(data.recipe,r=>{const m=data.materials.find(x=>x.id===r.materialId);return m?m.rate*r.qty:0})}
+function produce(){
+ const n=Math.floor(Number(val('prodQty')));if(n<1)return alert('أدخل عدد Kits صحيح');
+ if(!data.recipe.length)return alert('أضف وصفة الإنتاج أولاً');
+ for(const r of data.recipe){const m=data.materials.find(x=>x.id===r.materialId);if(!m||m.qty<r.qty*n)return alert('الكمية غير كافية من: '+(m?m.name:'مادة محذوفة'))}
+ const cost=recipeCost();data.recipe.forEach(r=>{const m=data.materials.find(x=>x.id===r.materialId);m.qty-=r.qty*n});
+ const oldQty=Number(data.finished)||0;data.unitCost=(oldQty*Number(data.unitCost)+n*cost)/(oldQty+n);data.finished+=n;
+ data.production.push({date:new Date().toISOString(),qty:n,unitCost:cost,totalCost:cost*n});clear(['prodQty']);save();
+}
+function addSale(){
+ const q=Math.floor(Number(val('saleQty'))),p=Number(val('salePrice'));
+ if(q<1||p<0||q>data.finished)return alert('تحقق من الكمية والسعر ومخزون Kits');
+ const total=q*p,paid=val('salePaid')===''?total:Number(val('salePaid'));
+ if(paid<0||paid>total)return alert('المبلغ المقبوض يجب أن يكون بين صفر وإجمالي البيع');
+ const now=new Date().toISOString();
+ data.finished-=q;data.sales.push({id:Date.now(),date:now,qty:q,price:p,customer:val('customer').trim(),paidAmount:paid,payments:paid?[{amount:paid,date:now,note:'دفعة عند البيع'}]:[],cost:q*Number(data.unitCost||0)});
+ clear(['saleQty','salePrice','customer','salePaid']);save();
+}
+function addExpense(){
+ const name=val('expenseName').trim(),amount=Number(val('expenseAmount'));if(!name||amount<=0)return alert('أدخل وصفاً ومبلغاً صحيحاً');
+ data.expenses.push({id:Date.now(),name,amount,category:val('expenseCategory'),date:new Date().toISOString()});clear(['expenseName','expenseAmount']);save();
+}
+function recordPayment(type,id){
+ const arr=type==='sale'?data.sales:data.purchases,item=arr.find(x=>x.id===id);if(!item)return;
+ const total=type==='sale'?item.qty*item.price:item.cost,remaining=total-(item.paidAmount||0);
+ const raw=prompt('المبلغ المستلم/المدفوع الآن. المتبقي: '+money(remaining));if(raw===null)return;
+ const amount=Number(raw);if(amount<=0||amount>remaining)return alert('أدخل مبلغاً صحيحاً لا يتجاوز المتبقي');
+ const now=new Date().toISOString();item.paidAmount=(item.paidAmount||0)+amount;item.payments=item.payments||[];item.payments.push({amount,date:now,note:'دفعة إضافية'});save();
+}
+function saveCapital(){const n=Number(val('capital'));if(n<0)return alert('رأس المال لا يمكن أن يكون سالباً');data.capital=n;save();alert('تم حفظ رأس المال')}
+function exportBackup(){
+ const blob=new Blob([JSON.stringify({...data,backupVersion:2,exportedAt:new Date().toISOString()},null,2)],{type:'application/json'});
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='NADIX-backup-v2.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+function restoreBackup(e){
+ const f=e.target.files[0];if(!f)return;const r=new FileReader();
+ r.onload=()=>{try{const x=JSON.parse(r.result);if(!Array.isArray(x.materials)||!Array.isArray(x.sales))throw 0;data={...blank(),...x};data.sales=data.sales.map(s=>({...s,paidAmount:s.paidAmount??(s.paid?s.qty*s.price:0),payments:s.payments||[]}));data.purchases=(data.purchases||[]).map(p=>({...p,paidAmount:p.paidAmount??(p.paid?p.cost:0),payments:p.payments||[]}));save();alert('تم استرجاع النسخة بنجاح')}catch(err){alert('ملف النسخة غير صالح')}e.target.value=''};
+ r.readAsText(f);
+}
+function clearData(){if(!confirm('هل أنت متأكد؟ سيتم حذف جميع البيانات من هذا المتصفح. صدّر نسخة احتياطية أولاً.'))return;if(!confirm('تأكيد أخير: هل تريد مسح كل بيانات NADIX؟'))return;data=blank();save()}
+function addHtml(el,html){el.insertAdjacentHTML('beforeend',html)}
 function render(){
- let t=totals();cash.textContent=money(t.cash);sales.textContent=money(t.sales);profit.textContent=money(t.profit);stock.textContent=data.finished;
- summary.innerHTML=`<div class="item"><span>المقبوضات من المبيعات</span><b>${money(t.received)}</b></div><div class="item"><span>قيمة مخزون المنتجات الجاهزة</span><b>${money(t.productionValue)}</b></div><div class="item"><span>مشتريات المواد</span><b>${money(t.purchases)}</b></div><div class="item"><span>المصاريف التشغيلية</span><b>${money(t.expenses)}</b></div><div class="item"><span>تكلفة المنتجات المباعة</span><b>${money(t.cogs)}</b></div>`;
- materialsList.innerHTML='';data.materials.forEach(m=>addItem(materialsList,`<div class="item"><span><b>${esc(m.name)}</b><br><small>${m.qty.toFixed(2)} ${esc(m.unit)} · ${money(m.rate)} / وحدة</small></span><b>${money(m.qty*m.rate)}</b></div>`));if(!data.materials.length)materialsList.innerHTML='<div class="empty">لا توجد مواد مسجلة بعد</div>';
- recipeMat.innerHTML='<option value="">اختر المادة</option>'+data.materials.map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join('');recipeList.innerHTML='';data.recipe.forEach(r=>{let m=data.materials.find(x=>x.id===r.materialId);if(m)addItem(recipeList,`<div class="item"><span>${esc(m.name)} لكل Kit</span><b>${r.qty} ${esc(m.unit)}</b></div>`)});productionHint.textContent='التكلفة المحسوبة للـKit حسب الوصفة الحالية: '+money(recipeCost());
- salesList.innerHTML='';[...data.sales].reverse().forEach(s=>addItem(salesList,`<div class="item"><span>${s.qty} Kit · ${esc(s.customer||'زبون')}<br><small>${s.paid?'مدفوع':'غير مدفوع'} · ${new Date(s.date).toLocaleDateString('ar-DZ')}</small></span><b>${money(s.qty*s.price)}</b></div>`));if(!data.sales.length)salesList.innerHTML='<div class="empty">لا توجد مبيعات بعد</div>';
- expensesList.innerHTML='';[...data.expenses].reverse().forEach(e=>addItem(expensesList,`<div class="item"><span>${esc(e.name)}</span><b>${money(e.amount)}</b></div>`));if(!data.expenses.length)expensesList.innerHTML='<div class="empty">لا توجد مصاريف بعد</div>';
+ const t=totals();cash.textContent=money(t.cash);sales.textContent=money(t.sales);profit.textContent=money(t.netProfit);stock.textContent=data.finished;
+ financialSummary.innerHTML=[
+ ['المقبوضات من المبيعات',money(t.received)],['ديون الزبائن',money(t.receivables)],['ديون الموردين',money(t.payables)],
+ ['قيمة مخزون المواد الخام',money(t.rawValue)],['قيمة Kits الجاهزة',money(t.finishedValue)],
+ ['تكلفة المنتجات المباعة',money(t.cogs)],['المصاريف التشغيلية',money(t.expenses)],['الربح الإجمالي',money(t.grossProfit)]
+ ].map(x=>`<div class="kpi"><span>${x[0]}</span><b>${x[1]}</b></div>`).join('');
+ materialsList.innerHTML='';data.materials.forEach(m=>addHtml(materialsList,`<div class="item"><span><b>${esc(m.name)}</b><small>${Number(m.qty).toFixed(2)} ${esc(m.unit)} · ${money(m.rate)} / وحدة</small></span><b>${money(m.qty*m.rate)}</b></div>`));if(!data.materials.length)materialsList.innerHTML='<div class="empty">لا توجد مواد مسجلة</div>';
+ const opts='<option value="">اختر المادة</option>'+data.materials.map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join('');purchaseMat.innerHTML=opts;recipeMat.innerHTML=opts;
+ recipeList.innerHTML='';data.recipe.forEach(r=>{const m=data.materials.find(x=>x.id===r.materialId);if(m)addHtml(recipeList,`<div class="item"><span>${esc(m.name)} لكل Kit</span><b>${r.qty} ${esc(m.unit)}</b></div>`)});recipeCost.textContent=money(recipeCost());
+ productionHint.textContent='تكلفة المواد حسب الوصفة الحالية لكل Kit: '+money(recipeCost());
+ productionList.innerHTML='';[...data.production].reverse().slice(0,8).forEach(p=>addHtml(productionList,`<div class="item"><span>${p.qty} Kits منتجة<small>${dateText(p.date)} · تكلفة الوحدة ${money(p.unitCost)}</small></span><b>${money(p.totalCost)}</b></div>`));
+ salesList.innerHTML='';[...data.sales].reverse().forEach(s=>{const total=s.qty*s.price,remaining=Math.max(0,total-(s.paidAmount||0));addHtml(salesList,`<div class="item"><span><b>${s.qty} Kit · ${esc(s.customer||'زبون')}</b><small>${dateText(s.date)} · ${remaining>0?'متبقي '+money(remaining):'مدفوع بالكامل'} · التكلفة ${money(s.cost)}</small></span><span style="text-align:left"><b>${money(total)}</b>${remaining>0?`<button class="secondary" onclick="recordPayment('sale',${s.id})" style="display:block;margin-top:5px">تسجيل قبض</button>`:'<span class="pill good">مكتمل</span>'}</span></div>`)});if(!data.sales.length)salesList.innerHTML='<div class="empty">لا توجد مبيعات بعد</div>';
+ purchasesList.innerHTML='';[...data.purchases].reverse().forEach(p=>{const rem=Math.max(0,p.cost-(p.paidAmount||0));addHtml(purchasesList,`<div class="item"><span><b>${esc(p.materialName)}</b><small>${dateText(p.date)} · ${p.qty} · المورد: ${esc(p.supplier||'—')} · ${rem>0?'متبقي '+money(rem):'مدفوع'}</small></span><span style="text-align:left"><b>${money(p.cost)}</b>${rem>0?`<button class="secondary" onclick="recordPayment('purchase',${p.id})" style="display:block;margin-top:5px">تسجيل دفع</button>`:'<span class="pill good">مكتمل</span>'}</span></div>`)});if(!data.purchases.length)purchasesList.innerHTML='<div class="empty">لا توجد مشتريات مسجلة</div>';
+ expensesList.innerHTML='';[...data.expenses].reverse().forEach(e=>addHtml(expensesList,`<div class="item"><span><b>${esc(e.name)}</b><small>${esc(e.category||'أخرى')} · ${dateText(e.date)}</small></span><b>${money(e.amount)}</b></div>`));if(!data.expenses.length)expensesList.innerHTML='<div class="empty">لا توجد مصاريف بعد</div>';
  capital.value=data.capital;
+ renderReports();
+ const events=[];
+ data.sales.forEach(s=>events.push({date:s.date,title:'بيع '+s.qty+' Kit',amount:s.qty*s.price,kind:'بيع'}));
+ data.purchases.forEach(p=>events.push({date:p.date,title:'شراء '+p.materialName,amount:-p.cost,kind:'شراء'}));
+ data.expenses.forEach(e=>events.push({date:e.date,title:e.name,amount:-e.amount,kind:'مصروف'}));
+ data.production.forEach(p=>events.push({date:p.date,title:'إنتاج '+p.qty+' Kits',amount:0,kind:'إنتاج'}));
+ events.sort((a,b)=>new Date(b.date)-new Date(a.date));
+ recentList.innerHTML=events.slice(0,5).map(e=>`<div class="item"><span>${esc(e.title)}<small>${e.kind} · ${dateText(e.date)}</small></span><b class="${e.amount<0?'danger':''}">${e.amount?money(e.amount):'—'}</b></div>`).join('')||'<div class="empty">ستظهر عملياتك هنا</div>';
 }
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function exportBackup(){let b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='NADIX-backup.json';a.click();URL.revokeObjectURL(a.href)}
-function restoreBackup(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!x.materials||!x.sales)throw 0;data={...blank(),...x};save();alert('تم استرجاع النسخة')}catch(err){alert('ملف النسخة غير صالح')}};r.readAsText(f)}
-let deferredPrompt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e});async function installApp(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt=null}else alert('إذا كان التطبيق منشوراً على رابط HTTPS: افتح قائمة Chrome ثم اختر إضافة إلى الشاشة الرئيسية.')}
-if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+function renderReports(){
+ if(!document.getElementById('reportSummary'))return;
+ const month=val('reportMonth')||new Date().toISOString().slice(0,7);
+ const inMonth=d=>String(d||'').slice(0,7)===month;
+ const ss=data.sales.filter(x=>inMonth(x.date)),pp=data.purchases.filter(x=>inMonth(x.date)),ee=data.expenses.filter(x=>inMonth(x.date));
+ const revenue=sum(ss,s=>s.qty*s.price),cost=sum(ss,s=>s.cost),exp=sum(ee,e=>e.amount),cashIn=sum(ss,s=>s.paidAmount||0),buyCash=sum(pp,s=>s.paidAmount||0);
+ reportSummary.innerHTML=[['المبيعات',money(revenue)],['المقبوضات',money(cashIn)],['تكلفة المنتجات المباعة',money(cost)],['المصاريف التشغيلية',money(exp)],['صافي ربح الشهر',money(revenue-cost-exp)],['مدفوعات مشتريات المواد',money(buyCash)]].map(x=>`<div class="kpi"><span>${x[0]}</span><b>${x[1]}</b></div>`).join('');
+ const events=[];ss.forEach(s=>events.push({date:s.date,label:'بيع '+s.qty+' Kit',value:s.qty*s.price}));pp.forEach(p=>events.push({date:p.date,label:'شراء '+p.materialName,value:-p.cost}));ee.forEach(e=>events.push({date:e.date,label:e.name,value:-e.amount}));
+ events.sort((a,b)=>new Date(b.date)-new Date(a.date));
+ ledger.innerHTML=events.map(e=>`<div class="item"><span>${esc(e.label)}<small>${dateText(e.date)}</small></span><b class="${e.value<0?'danger':''}">${money(e.value)}</b></div>`).join('')||'<div class="empty">لا توجد عمليات في هذا الشهر</div>';
+}
+document.getElementById('reportMonth').value=new Date().toISOString().slice(0,7);
 render();
 </script>
 </body></html>
