@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#173b32">
-<meta name="description" content="NADIX Manager V2 - إدارة ومحاسبة مشروع NADIX">
+<meta name="description" content="NADIX Manager V3 - إدارة ومحاسبة مشروع NADIX">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<title>NADIX Manager V2</title>
+<title>NADIX Manager V3</title>
 <style>
 :root{--green:#173b32;--green2:#245747;--mint:#e8f1ec;--gold:#e8bd69;--ink:#1d2925;--muted:#718078;--bg:#f4f7f4;--white:#fff;--red:#b33b3b;--line:#e5ece7;--blue:#eaf2fb}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif}
@@ -42,12 +42,15 @@ nav button.active{color:var(--green);font-weight:800}nav span{display:block;font
 </style>
 </head>
 <body>
-<header><div class="brand"><div class="logo">N</div><div><h1>NADIX Manager <small style="font-size:11px;color:#e8bd69">V2</small></h1><p>إدارة ومحاسبة مشروعك · الدينار الجزائري</p></div></div></header>
+<header><div class="brand"><div class="logo">N</div><div><h1>NADIX Manager <small style="font-size:11px;color:#e8bd69">V3</small></h1><p>إدارة ومحاسبة مشروعك · الدينار الجزائري</p></div></div></header>
 <main>
 <section id="home" class="section active">
 <h2>لوحة التحكم</h2>
 <div class="stats">
-<div class="stat"><small>الرصيد النقدي</small><strong id="cash">0 دج</strong></div>
+<div class="stat"><small>رأس المال المتبقي (السيولة)</small><strong id="cash">0 دج</strong></div>
+ <div class="stat"><small>رأس المال الأصلي</small><strong id="capitalStart">0 دج</strong></div>
+ <div class="stat"><small>الفرق بين رأس المال والربح</small><strong id="capitalProfitDiff">0 دج</strong></div>
+ <div class="stat"><small>قيمة المشروع الحالية</small><strong id="businessValue">0 دج</strong></div>
 <div class="stat"><small>صافي الربح</small><strong id="profit">0 دج</strong></div>
 <div class="stat"><small>إجمالي المبيعات</small><strong id="sales">0 دج</strong></div>
 <div class="stat"><small>مخزون Kits الجاهزة</small><strong id="stock">0</strong></div>
@@ -104,7 +107,7 @@ nav button.active{color:var(--green);font-weight:800}nav span{display:block;font
 <section id="reports" class="section">
 <div class="panel"><div class="monthhead"><h2>التقرير الشهري</h2><input id="reportMonth" type="month" style="max-width:165px" onchange="renderReports()"></div>
 <div id="reportSummary"></div></div>
-<div class="panel"><h2>سجل العمليات</h2><div id="ledger"></div></div>
+<div class="panel"><h2>سجل العمليات</h2><div id="ledger"></div></div><div class="panel"><h2>سجل التصحيحات والحذف</h2><div id="auditList"></div></div>
 </section>
 
 <section id="settings" class="section">
@@ -131,12 +134,12 @@ nav button.active{color:var(--green);font-weight:800}nav span{display:block;font
 </nav>
 <script>
 const KEY='nadix_pwa_v1';
-function blank(){return {capital:5000,materials:[],purchases:[],recipe:[],finished:0,unitCost:0,sales:[],expenses:[],production:[]}}
+function blank(){return {capital:5000,materials:[],purchases:[],recipe:[],finished:0,unitCost:0,sales:[],expenses:[],production:[],audit:[]}}
 function load(){
  try{
   const old=JSON.parse(localStorage.getItem(KEY)||'{}');
   const d={...blank(),...old};
-  ['materials','purchases','recipe','sales','expenses','production'].forEach(k=>{if(!Array.isArray(d[k]))d[k]=[]});
+  ['materials','purchases','recipe','sales','expenses','production','audit'].forEach(k=>{if(!Array.isArray(d[k]))d[k]=[]});
   d.sales=d.sales.map(s=>({...s,paidAmount:s.paidAmount==null?(s.paid?Number(s.qty)*Number(s.price):0):Number(s.paidAmount),payments:Array.isArray(s.payments)?s.payments:[]}));
   d.purchases=d.purchases.map(p=>({...p,paidAmount:p.paidAmount==null?(p.paid?Number(p.cost):0):Number(p.paidAmount),payments:Array.isArray(p.payments)?p.payments:[]}));
   return d;
@@ -175,6 +178,7 @@ function addPurchase(){
  if(!m||qty<=0||cost<0)return alert('اختر المادة وأدخل كمية وتكلفة صحيحتين');
  let paid=val('purchasePaid')===''?cost:Number(val('purchasePaid'));
  if(paid<0||paid>cost)return alert('المبلغ المدفوع يجب أن يكون بين صفر وتكلفة الشراء');
+  if(paid>totals().cash)return alert('الرصيد النقدي غير كافٍ لهذه الدفعة. المتاح: '+money(totals().cash));
  const oldValue=m.qty*m.rate;m.qty+=qty;m.rate=(oldValue+cost)/m.qty;
  data.purchases.push({id:Date.now(),date:new Date().toISOString(),materialId:id,materialName:m.name,qty,cost,supplier:val('supplier').trim(),note:val('purchaseNote').trim(),paidAmount:paid,payments:paid?[{amount:paid,date:new Date().toISOString(),note:'دفعة أولى'}]:[]});
  clear(['purchaseQty','purchaseCost','supplier','purchasePaid','purchaseNote']);save();
@@ -203,6 +207,7 @@ function addSale(){
 }
 function addExpense(){
  const name=val('expenseName').trim(),amount=Number(val('expenseAmount'));if(!name||amount<=0)return alert('أدخل وصفاً ومبلغاً صحيحاً');
+  if(amount>totals().cash)return alert('الرصيد النقدي غير كافٍ. المتاح: '+money(totals().cash));
  data.expenses.push({id:Date.now(),name,amount,category:val('expenseCategory'),date:new Date().toISOString()});clear(['expenseName','expenseAmount']);save();
 }
 function recordPayment(type,id){
@@ -210,12 +215,87 @@ function recordPayment(type,id){
  const total=type==='sale'?item.qty*item.price:item.cost,remaining=total-(item.paidAmount||0);
  const raw=prompt('المبلغ المستلم/المدفوع الآن. المتبقي: '+money(remaining));if(raw===null)return;
  const amount=Number(raw);if(amount<=0||amount>remaining)return alert('أدخل مبلغاً صحيحاً لا يتجاوز المتبقي');
+  if(type==='purchase'&&amount>totals().cash)return alert('الرصيد النقدي غير كافٍ. المتاح: '+money(totals().cash));
  const now=new Date().toISOString();item.paidAmount=(item.paidAmount||0)+amount;item.payments=item.payments||[];item.payments.push({amount,date:now,note:'دفعة إضافية'});save();
 }
+
+function auditLog(action,kind,oldValue,newValue){
+ data.audit=data.audit||[];
+ data.audit.unshift({date:new Date().toISOString(),action,kind,oldValue,newValue});
+}
+function editRecord(kind,id){
+ let item,oldValue,newValue;
+ if(kind==='expense'){
+  item=data.expenses.find(x=>x.id===id);if(!item)return;
+  oldValue={name:item.name,amount:item.amount,category:item.category};
+  const name=prompt('تصحيح وصف المصروف:',item.name);if(name===null)return;
+  const amount=Number(prompt('تصحيح المبلغ بالدينار:',item.amount));
+  if(!name.trim()||!Number.isFinite(amount)||amount<0)return alert('بيانات غير صحيحة');
+  if(amount-item.amount>totals().cash)return alert('الرصيد غير كافٍ لهذه الزيادة');
+  item.name=name.trim();item.amount=amount;
+  item.category=prompt('تصحيح التصنيف:',item.category||'أخرى')||item.category;
+  newValue={name:item.name,amount:item.amount,category:item.category};
+ }else if(kind==='purchase'){
+  item=data.purchases.find(x=>x.id===id);if(!item)return;
+  oldValue={qty:item.qty,cost:item.cost,paidAmount:item.paidAmount,supplier:item.supplier};
+  const qty=Number(prompt('تصحيح الكمية:',item.qty));if(!Number.isFinite(qty)||qty<=0)return alert('الكمية غير صحيحة');
+  const cost=Number(prompt('تصحيح التكلفة الإجمالية:',item.cost));if(!Number.isFinite(cost)||cost<0)return alert('التكلفة غير صحيحة');
+  const paid=Number(prompt('تصحيح المبلغ المدفوع:',item.paidAmount||0));
+  if(!Number.isFinite(paid)||paid<0||paid>cost)return alert('المبلغ المدفوع غير صحيح');
+  if(totals().cash+(item.paidAmount||0)-paid<0)return alert('الرصيد النقدي لا يكفي بعد التصحيح');
+  const m=data.materials.find(x=>x.id===item.materialId);
+  if(m){
+   const nextQty=m.qty+(qty-item.qty);
+   if(nextQty<0)return alert('لا يمكن تقليل الكمية: يبدو أن جزءاً منها استُهلك في الإنتاج');
+   const nextValue=m.qty*m.rate-item.cost+cost;
+   if(nextValue<0)return alert('لا يمكن تطبيق التصحيح على قيمة المخزون الحالية');
+   m.qty=nextQty;m.rate=nextQty>0?nextValue/nextQty:0;
+  }
+  item.qty=qty;item.cost=cost;item.paidAmount=paid;
+  item.supplier=prompt('تصحيح اسم المورد:',item.supplier||'')??item.supplier;
+  newValue={qty:item.qty,cost:item.cost,paidAmount:item.paidAmount,supplier:item.supplier};
+ }else if(kind==='sale'){
+  item=data.sales.find(x=>x.id===id);if(!item)return;
+  oldValue={qty:item.qty,price:item.price,paidAmount:item.paidAmount,customer:item.customer};
+  const qty=Math.floor(Number(prompt('تصحيح عدد Kits:',item.qty)));
+  if(!Number.isFinite(qty)||qty<0)return alert('الكمية غير صحيحة');
+  const price=Number(prompt('تصحيح سعر البيع للوحدة:',item.price));
+  if(!Number.isFinite(price)||price<0)return alert('السعر غير صحيح');
+  const total=qty*price;
+  const paid=Number(prompt('تصحيح المبلغ المقبوض:',item.paidAmount||0));
+  if(!Number.isFinite(paid)||paid<0||paid>total)return alert('المبلغ المقبوض غير صحيح');
+  if(totals().cash-(item.paidAmount||0)+paid<0)return alert('التصحيح يجعل الرصيد النقدي سالباً');
+  if(data.finished+(item.qty-qty)<0)return alert('لا يوجد مخزون كافٍ لعكس هذه الكمية');
+  data.finished+=item.qty-qty;item.qty=qty;item.price=price;item.paidAmount=paid;
+  item.customer=prompt('تصحيح اسم الزبون:',item.customer||'')??item.customer;
+  item.cost=qty*Number(data.unitCost||0);
+  newValue={qty:item.qty,price:item.price,paidAmount:item.paidAmount,customer:item.customer};
+ }else{return}
+ auditLog('تصحيح',kind,oldValue,newValue);save();alert('تم التصحيح وإعادة الحساب');
+}
+function deleteRecord(kind,id){
+ if(!confirm('هل تريد حذف هذه العملية؟ سيتم تحديث الحسابات.'))return;
+ let arr=kind==='sale'?data.sales:kind==='purchase'?data.purchases:data.expenses;
+ const i=arr.findIndex(x=>x.id===id);if(i<0)return;
+ const item=arr[i];
+ if(kind==='sale'){data.finished+=item.qty;}
+ else if(kind==='purchase'){
+  const m=data.materials.find(x=>x.id===item.materialId);
+  if(m){
+   const nextQty=m.qty-item.qty;
+   if(nextQty<0)return alert('لا يمكن حذف الشراء لأن جزءاً من الكمية استُهلك في الإنتاج');
+   const nextValue=m.qty*m.rate-item.cost;
+   if(nextValue<0)return alert('لا يمكن حذف الشراء بسبب قيمة المخزون الحالية');
+   m.qty=nextQty;m.rate=nextQty?nextValue/nextQty:0;
+  }
+ }
+ auditLog('حذف',kind,{...item},null);arr.splice(i,1);save();
+}
+
 function saveCapital(){const n=Number(val('capital'));if(n<0)return alert('رأس المال لا يمكن أن يكون سالباً');data.capital=n;save();alert('تم حفظ رأس المال')}
 function exportBackup(){
- const blob=new Blob([JSON.stringify({...data,backupVersion:2,exportedAt:new Date().toISOString()},null,2)],{type:'application/json'});
- const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='NADIX-backup-v2.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+ const blob=new Blob([JSON.stringify({...data,backupVersion:3,exportedAt:new Date().toISOString()},null,2)],{type:'application/json'});
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='NADIX-backup-v3.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 }
 function restoreBackup(e){
  const f=e.target.files[0];if(!f)return;const r=new FileReader();
@@ -225,9 +305,9 @@ function restoreBackup(e){
 function clearData(){if(!confirm('هل أنت متأكد؟ سيتم حذف جميع البيانات من هذا المتصفح. صدّر نسخة احتياطية أولاً.'))return;if(!confirm('تأكيد أخير: هل تريد مسح كل بيانات NADIX؟'))return;data=blank();save()}
 function addHtml(el,html){el.insertAdjacentHTML('beforeend',html)}
 function render(){
- const t=totals();cash.textContent=money(t.cash);sales.textContent=money(t.sales);profit.textContent=money(t.netProfit);stock.textContent=data.finished;
+ const t=totals();cash.textContent=money(t.cash);sales.textContent=money(t.sales);profit.textContent=money(t.netProfit);stock.textContent=data.finished;capitalStart.textContent=money(data.capital);capitalProfitDiff.textContent=money(t.capitalProfitDiff);businessValue.textContent=money(t.businessValue);
  financialSummary.innerHTML=[
- ['المقبوضات من المبيعات',money(t.received)],['ديون الزبائن',money(t.receivables)],['ديون الموردين',money(t.payables)],
+ ['رأس المال الأصلي',money(data.capital)],['السيولة المتبقية بعد المشتريات والمصاريف',money(t.cash)],['الربح الصافي المستقل',money(t.netProfit)],['الفرق بين رأس المال والربح (رأس المال − الربح)',money(t.capitalProfitDiff)],['القيمة الصافية للمشروع (السيولة + المخزون + الديون المستحقة − ديون الموردين)',money(t.businessValue)],['المقبوضات من المبيعات',money(t.received)],['ديون الزبائن',money(t.receivables)],['ديون الموردين',money(t.payables)],
  ['قيمة مخزون المواد الخام',money(t.rawValue)],['قيمة Kits الجاهزة',money(t.finishedValue)],
  ['تكلفة المنتجات المباعة',money(t.cogs)],['المصاريف التشغيلية',money(t.expenses)],['الربح الإجمالي',money(t.grossProfit)]
  ].map(x=>`<div class="kpi"><span>${x[0]}</span><b>${x[1]}</b></div>`).join('');
@@ -236,9 +316,9 @@ function render(){
  recipeList.innerHTML='';data.recipe.forEach(r=>{const m=data.materials.find(x=>x.id===r.materialId);if(m)addHtml(recipeList,`<div class="item"><span>${esc(m.name)} لكل Kit</span><b>${r.qty} ${esc(m.unit)}</b></div>`)});recipeCost.textContent=money(recipeCost());
  productionHint.textContent='تكلفة المواد حسب الوصفة الحالية لكل Kit: '+money(recipeCost());
  productionList.innerHTML='';[...data.production].reverse().slice(0,8).forEach(p=>addHtml(productionList,`<div class="item"><span>${p.qty} Kits منتجة<small>${dateText(p.date)} · تكلفة الوحدة ${money(p.unitCost)}</small></span><b>${money(p.totalCost)}</b></div>`));
- salesList.innerHTML='';[...data.sales].reverse().forEach(s=>{const total=s.qty*s.price,remaining=Math.max(0,total-(s.paidAmount||0));addHtml(salesList,`<div class="item"><span><b>${s.qty} Kit · ${esc(s.customer||'زبون')}</b><small>${dateText(s.date)} · ${remaining>0?'متبقي '+money(remaining):'مدفوع بالكامل'} · التكلفة ${money(s.cost)}</small></span><span style="text-align:left"><b>${money(total)}</b>${remaining>0?`<button class="secondary" onclick="recordPayment('sale',${s.id})" style="display:block;margin-top:5px">تسجيل قبض</button>`:'<span class="pill good">مكتمل</span>'}</span></div>`)});if(!data.sales.length)salesList.innerHTML='<div class="empty">لا توجد مبيعات بعد</div>';
- purchasesList.innerHTML='';[...data.purchases].reverse().forEach(p=>{const rem=Math.max(0,p.cost-(p.paidAmount||0));addHtml(purchasesList,`<div class="item"><span><b>${esc(p.materialName)}</b><small>${dateText(p.date)} · ${p.qty} · المورد: ${esc(p.supplier||'—')} · ${rem>0?'متبقي '+money(rem):'مدفوع'}</small></span><span style="text-align:left"><b>${money(p.cost)}</b>${rem>0?`<button class="secondary" onclick="recordPayment('purchase',${p.id})" style="display:block;margin-top:5px">تسجيل دفع</button>`:'<span class="pill good">مكتمل</span>'}</span></div>`)});if(!data.purchases.length)purchasesList.innerHTML='<div class="empty">لا توجد مشتريات مسجلة</div>';
- expensesList.innerHTML='';[...data.expenses].reverse().forEach(e=>addHtml(expensesList,`<div class="item"><span><b>${esc(e.name)}</b><small>${esc(e.category||'أخرى')} · ${dateText(e.date)}</small></span><b>${money(e.amount)}</b></div>`));if(!data.expenses.length)expensesList.innerHTML='<div class="empty">لا توجد مصاريف بعد</div>';
+ salesList.innerHTML='';[...data.sales].reverse().forEach(s=>{const total=s.qty*s.price,remaining=Math.max(0,total-(s.paidAmount||0));addHtml(salesList,`<div class="item"><span><b>${s.qty} Kit · ${esc(s.customer||'زبون')}</b><small>${dateText(s.date)} · ${remaining>0?'متبقي '+money(remaining):'مدفوع بالكامل'} · التكلفة ${money(s.cost)}</small></span><span style="text-align:left"><b>${money(total)}</b>${remaining>0?`<button class="secondary" onclick="recordPayment('sale',${s.id})" style="display:block;margin-top:5px">تسجيل قبض</button>`:'<span class="pill good">مكتمل</span>'}<div class="actions" style="margin-top:5px"><button class="secondary" onclick="editRecord('sale',${s.id})">تصحيح</button><button class="warn" onclick="deleteRecord('sale',${s.id})">حذف</button></div></span></div>`)});if(!data.sales.length)salesList.innerHTML='<div class="empty">لا توجد مبيعات بعد</div>';
+ purchasesList.innerHTML='';[...data.purchases].reverse().forEach(p=>{const rem=Math.max(0,p.cost-(p.paidAmount||0));addHtml(purchasesList,`<div class="item"><span><b>${esc(p.materialName)}</b><small>${dateText(p.date)} · ${p.qty} · المورد: ${esc(p.supplier||'—')} · ${rem>0?'متبقي '+money(rem):'مدفوع'}</small></span><span style="text-align:left"><b>${money(p.cost)}</b>${rem>0?`<button class="secondary" onclick="recordPayment('purchase',${p.id})" style="display:block;margin-top:5px">تسجيل دفع</button>`:'<span class="pill good">مكتمل</span>'}<div class="actions" style="margin-top:5px"><button class="secondary" onclick="editRecord('purchase',${p.id})">تصحيح</button><button class="warn" onclick="deleteRecord('purchase',${p.id})">حذف</button></div></span></div>`)});if(!data.purchases.length)purchasesList.innerHTML='<div class="empty">لا توجد مشتريات مسجلة</div>';
+ expensesList.innerHTML='';[...data.expenses].reverse().forEach(e=>addHtml(expensesList,`<div class="item"><span><b>${esc(e.name)}</b><small>${esc(e.category||'أخرى')} · ${dateText(e.date)}</small></span><span style="text-align:left"><b>${money(e.amount)}</b><div class="actions" style="margin-top:5px"><button class="secondary" onclick="editRecord('expense',${e.id})">تصحيح</button><button class="warn" onclick="deleteRecord('expense',${e.id})">حذف</button></div></span></div>`));if(!data.expenses.length)expensesList.innerHTML='<div class="empty">لا توجد مصاريف بعد</div>';
  capital.value=data.capital;
  renderReports();
  const events=[];
@@ -259,6 +339,8 @@ function renderReports(){
  const events=[];ss.forEach(s=>events.push({date:s.date,label:'بيع '+s.qty+' Kit',value:s.qty*s.price}));pp.forEach(p=>events.push({date:p.date,label:'شراء '+p.materialName,value:-p.cost}));ee.forEach(e=>events.push({date:e.date,label:e.name,value:-e.amount}));
  events.sort((a,b)=>new Date(b.date)-new Date(a.date));
  ledger.innerHTML=events.map(e=>`<div class="item"><span>${esc(e.label)}<small>${dateText(e.date)}</small></span><b class="${e.value<0?'danger':''}">${money(e.value)}</b></div>`).join('')||'<div class="empty">لا توجد عمليات في هذا الشهر</div>';
+  const auditList=document.getElementById('auditList');
+  if(auditList)auditList.innerHTML=(data.audit||[]).slice(0,30).map(a=>`<div class="item"><span><b>${esc(a.action)} · ${esc(a.kind)}</b><small>${dateText(a.date)} · قبل: ${esc(JSON.stringify(a.oldValue||{}))} · بعد: ${esc(JSON.stringify(a.newValue||{}))}</small></span></div>`).join('')||'<div class="empty">لا توجد تصحيحات بعد</div>';
 }
 document.getElementById('reportMonth').value=new Date().toISOString().slice(0,7);
 render();
